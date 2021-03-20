@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 endpoint = "http://localhost:10080"
 root_route = urljoin(endpoint, "/")
 sign_in_route = urljoin(endpoint, "/users/sign_in")
-pat_route = urljoin(endpoint, "/profile/personal_access_tokens")
+pat_route = urljoin(endpoint, "/-/profile/personal_access_tokens")
 
 login = "root"
 password = "password"
@@ -34,6 +34,13 @@ def obtain_csrf_token():
     return token, r.cookies
 
 
+def obtain_authenticity_token(cookies):
+    r = requests.get(pat_route, cookies=cookies)
+    soup = BeautifulSoup(r.text, "lxml")
+    token = soup.find('input', attrs={'name': 'authenticity_token', 'type': 'hidden'}).get('value')
+    return token
+
+
 def sign_in(csrf, cookies):
     data = {
         "user[login]": login,
@@ -47,11 +54,12 @@ def sign_in(csrf, cookies):
     return token, r.history[0].cookies
 
 
-def obtain_personal_access_token(name, expires_at, csrf, cookies):
+def obtain_personal_access_token(name, expires_at, csrf, cookies, authenticity_token):
     data = {
         "personal_access_token[expires_at]": expires_at,
         "personal_access_token[name]": name,
         "personal_access_token[scopes][]": "api",
+        "authenticity_token": authenticity_token,
         "utf8": "✓"
     }
     data.update(csrf)
@@ -66,10 +74,11 @@ def main():
     print("root", csrf1, cookies1)
     csrf2, cookies2 = sign_in(csrf1, cookies1)
     print("sign_in", csrf2, cookies2)
+    authenticity_token = obtain_authenticity_token(cookies2)
 
     name = sys.argv[1]
     expires_at = sys.argv[2]
-    token = obtain_personal_access_token(name, expires_at, csrf2, cookies2)
+    token = obtain_personal_access_token(name, expires_at, csrf2, cookies2, authenticity_token)
     print(token)
 
 
