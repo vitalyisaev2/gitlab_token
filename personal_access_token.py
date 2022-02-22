@@ -41,11 +41,11 @@ def obtain_authenticity_token(cookies):
     return token
 
 
-def sign_in(csrf, cookies):
+def sign_in(login, password, csrf, cookies, authenticity_token):
     data = {
-        "user[login]": login,
-        "user[password]": password,
-        "user[remember_me]": 0,
+        "username": login,
+        "password": password,
+        "authenticity_token": authenticity_token,
         "utf8": "✓"
     }
     data.update(csrf)
@@ -72,13 +72,14 @@ def obtain_personal_access_token(name, expires_at, csrf, cookies, authenticity_t
 def main():
     csrf1, cookies1 = obtain_csrf_token()
     print("root", csrf1, cookies1)
-    csrf2, cookies2 = sign_in(csrf1, cookies1)
+    authenticity_token1 = obtain_authenticity_token(cookies1)
+    csrf2, cookies2 = sign_in(csrf1, cookies1, authenticity_token1)
     print("sign_in", csrf2, cookies2)
-    authenticity_token = obtain_authenticity_token(cookies2)
+    authenticity_token2 = obtain_authenticity_token(cookies2)
 
     name = sys.argv[1]
     expires_at = sys.argv[2]
-    token = obtain_personal_access_token(name, expires_at, csrf2, cookies2, authenticity_token)
+    token = obtain_personal_access_token(name, expires_at, csrf2, cookies2, authenticity_token2)
     print(token)
 
 
