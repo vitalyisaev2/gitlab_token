@@ -17,7 +17,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 endpoint = os.environ.get("GITLAB_SERVER", "https://localhost:8080")
 login = os.environ.get("GITLAB_USERNAME", "root")
 password = os.environ.get("GITLAB_PASSWORD", "password")
-api_scope = os.environ.get("GITLAB_TOKE_SCOPE", "api")
+api_scope = os.environ.get("GITLAB_TOKEN_SCOPE", "api")
 
 host_name = urlparse(endpoint).hostname
 root_route = urljoin(endpoint, "/")
